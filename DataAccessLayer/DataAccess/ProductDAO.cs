@@ -149,7 +149,7 @@ namespace DataAccessLayer.DataAccess
                                           ,UpdateDate
                                           ,IsDeleted
                                       FROM Products
-                                      WHERE ProductID = {id}";
+                                      WHERE ProductID = {id} AND IsDeleted = 0";
                     var product = await con.QuerySingleOrDefaultAsync<Product>(query, new { Id = id });
 
                     return product;
@@ -166,9 +166,9 @@ namespace DataAccessLayer.DataAccess
             string query = string.Empty;
             if(value != null)
             {
-                query += @"AND ProductName LIKE '%' + @ProductName + '%'  OR ProductCategory LIKE '%' + @ProductCategory + '%' OR Description LIKE '%' + @Description + '%'";
+                query += @"AND (ProductName LIKE '%' + @ProductName + '%'  OR ProductCategory LIKE '%' + @ProductCategory + '%' OR Description LIKE '%' + @Description + '%')";
             }
-            else if (minPrice != null && maxPrice != null)
+            if (minPrice != null && maxPrice != null)
             {
                 query += @"AND Price >= @MinPrice AND Price <= @MaxPrice";
             }
@@ -227,8 +227,6 @@ namespace DataAccessLayer.DataAccess
                               Description = @Description,
                               Price = @Price,
                               ImgURL = @ImgUrl,
-                              CreateBy = @CreateBy,
-                              CreateDate = @CreateDate,
                               IsDeleted = @IsDeleted,
                               UpdateBy = @UpdateBy,
                               UpdateDate = @UpdateDate 
@@ -241,8 +239,6 @@ namespace DataAccessLayer.DataAccess
                         command.Parameters.Add(new SqlParameter("@Description", product.Description));
                         command.Parameters.Add(new SqlParameter("@Price", product.Price));
                         command.Parameters.Add(new SqlParameter("@ImgUrl", product.ImgUrl));
-                        command.Parameters.Add(new SqlParameter("@CreateBy", product.CreateBy));
-                        command.Parameters.Add(new SqlParameter("@CreateDate", product.CreateDate));
                         command.Parameters.Add(new SqlParameter("@IsDeleted", false)); 
                         command.Parameters.Add(new SqlParameter("@UpdateBy", userID));
                         command.Parameters.Add(new SqlParameter("@UpdateDate", DateTime.Now));

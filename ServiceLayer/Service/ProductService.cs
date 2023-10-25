@@ -1,6 +1,8 @@
 ﻿using DataAccessLayer.DataAccessInterfaces;
 using Fooding_Shop.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.FileProviders;
 using Models_Layer.ModelRequest;
 using Models_Layer.ModelResponse;
 using Services_Layer.ServiceInterfaces;
@@ -9,6 +11,7 @@ namespace Services_Layer.Service
 {
     public class ProductService : IProductService
     {
+        private readonly PathString requestPath;
         private readonly ICategoryDAO categoryDAO;
         private readonly IProductDAO productDAO;
         private readonly IAutoMapperService autoMapperService;
@@ -19,18 +22,19 @@ namespace Services_Layer.Service
             this.categoryDAO = categoryDAO;
         }
 
-        public async Task<bool> Create(ProductModelView productModelView, int userID)
+        public async Task<bool> Create(ProductRequest productRequest, int userID)
         {
+            string imgUrl = "https://localhost:44352/Image/" + productRequest.ImgUrl;
             try
             {
                 Product product = new Product()
                 {
-                    ProductId = productModelView.ProductRequest.ProductId,
-                    ProductName = productModelView.ProductRequest.ProductName,
-                    ProductCategory = productModelView.ProductRequest.ProductCategory,
-                    Description = productModelView.ProductRequest.Description,
-                    Price = productModelView.ProductRequest.Price,
-                    ImgUrl = productModelView.ProductRequest.ImgUrl,
+                    ProductId = productRequest.ProductId,
+                    ProductName = productRequest.ProductName,
+                    ProductCategory = productRequest.ProductCategory,
+                    Description = productRequest.Description,
+                    Price = productRequest.Price,
+                    ImgUrl = imgUrl,
                     CreateBy = userID,
                     CreateDate = DateTime.Now,
                     UpdateBy = userID,
@@ -50,8 +54,6 @@ namespace Services_Layer.Service
             {
                 throw new Exception(ex.Message);
             }
-            
-            
         }
 
         public Task<bool> Delete(int id)
@@ -74,16 +76,19 @@ namespace Services_Layer.Service
             }
         }
 
-        public async Task<ProductModelView> GetProductByID(int id)
+        public async Task<ProductRequest> GetProductByID(int id)
         {
-            var productDetail = await productDAO.GetProduct(id);
-            var productCategory = await categoryDAO.GetListCategory();
-            var productViewModel = new ProductModelView()
+            var product = await productDAO.GetProduct(id);
+            var productDetail = new ProductRequest()
             {
-                ProductRequest = productDetail,
-                CategoryRequest = productCategory
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                ProductCategory = product.ProductCategory,
+                Price = product.Price,
+                Description = product.Description,
+                ImgUrl = product.ImgUrl,
             };
-            return productViewModel;
+            return productDetail;
         }
 
         public async Task<List<ProductRequest>> GetProductList()
@@ -106,20 +111,19 @@ namespace Services_Layer.Service
             }
         }
 
-        public async Task<bool> UpdateAsync(ProductModelView productModelView, int userId)
+        public async Task<bool> UpdateAsync(ProductRequest productRequest, int userId)
         {
-            if (productModelView != null)
+            string imgUrl = "https://localhost:44352/Image/" + productRequest.ImgUrl;
+            if (productRequest != null)
             {
                 var product = new Product()
                 {
-                    ProductId = productModelView.ProductRequest.ProductId,
-                    ProductName = productModelView.ProductRequest.ProductName,
-                    ProductCategory = productModelView.ProductRequest.ProductCategory,
-                    Price = productModelView.ProductRequest.Price,
-                    ImgUrl = productModelView.ProductRequest.ImgUrl,
-                    Description = productModelView.ProductRequest.Description,
-                    CreateBy = productModelView.ProductRequest.CreateBy,
-                    CreateDate = productModelView.ProductRequest.CreateDate,
+                    ProductId = productRequest.ProductId,
+                    ProductName = productRequest.ProductName,
+                    ProductCategory = productRequest.ProductCategory,
+                    Price = productRequest.Price,
+                    ImgUrl = imgUrl,
+                    Description = productRequest.Description,
                     UpdateBy = userId,
                     UpdateDate = DateTime.Now,
                     IsDeleted = false

@@ -149,7 +149,7 @@ namespace DataAccessLayer.DataAccess
                                           ,PhoneNumber
                                           ,Status
                                       FROM [dbo].[User]
-                                      WHERE UserID = {id} AND IsDelete = 0";
+                                      WHERE UserID = {id} AND IsDeleted = 0";
                     var user = await con.QuerySingleOrDefaultAsync<UserRequest>(query, new { Id = id });
 
                     return user;
@@ -201,8 +201,6 @@ namespace DataAccessLayer.DataAccess
                               Role = @Role,
                               PhoneNumber = @PhoneNumber,
                               Status = @Status,
-                              CreateBy = @CreateBy,
-                              CreateDate = @CreateDate,
                               IsDeleted = @IsDeleted,
                               UpdateBy = @UpdateBy,
                               UpdateDate = @UpdateDate 
@@ -215,8 +213,6 @@ namespace DataAccessLayer.DataAccess
                         command.Parameters.Add(new SqlParameter("@Role", user.Role));
                         command.Parameters.Add(new SqlParameter("@PhoneNumber", user.PhoneNumber));
                         command.Parameters.Add(new SqlParameter("@Status", user.Status));
-                        command.Parameters.Add(new SqlParameter("@CreateBy", user.CreateBy));
-                        command.Parameters.Add(new SqlParameter("@CreateDate", user.CreateDate));
                         command.Parameters.Add(new SqlParameter("@IsDeleted", false));
                         command.Parameters.Add(new SqlParameter("@UpdateBy", userID));
                         command.Parameters.Add(new SqlParameter("@UpdateDate", DateTime.Now));

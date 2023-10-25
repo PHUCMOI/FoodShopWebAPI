@@ -1,4 +1,5 @@
 ﻿using Fooding_Shop.Models;
+using ModelLayer.Models;
 using Models_Layer.ModelRequest;
 using Models_Layer.ModelResponse;
 using System;
@@ -12,10 +13,10 @@ namespace DataAccessLayer.DataAccessInterfaces
     public interface IOrderDAO
     {
         Task<List<OrderRequest>> GetAllOrders();
-        Task<OrderDetailModelView> GetOrder(int id);
+        Task<UpdateOrderRequest> GetOrder(int id);
         Task<bool> Create(Order order, List<OrderDetail> orderDetails);
-        Task<bool> UpdateAsync(OrderDetailModelView orderDetailModelView, int userID, decimal totalPrice);
-        bool Delete(int id);
+        Task<bool> UpdateAsync(UpdateOrderRequest updateOrderRequest, int userID, decimal totalPrice);
+        Task<bool> Delete(int id);
 
     }
 }

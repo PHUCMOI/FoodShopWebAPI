@@ -16,7 +16,7 @@ namespace Services_Layer.Service
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:7019"); // Thay thế bằng địa chỉ cơ sở của bạn
+                    httpClient.BaseAddress = new Uri("https://localhost:44352/Image/"); // Thay thế bằng địa chỉ cơ sở của bạn
                     byte[] imageBytes = httpClient.GetByteArrayAsync(filePath).Result;
 
                     // Kiểm tra xem tệp tải xuống có phải là hình ảnh không

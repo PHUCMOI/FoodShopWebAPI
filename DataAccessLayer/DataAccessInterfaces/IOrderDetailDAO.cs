@@ -10,9 +10,10 @@ namespace DataAccessLayer.DataAccessInterfaces
 {
     public interface IOrderDetailDAO
     {
-        Task<List<OrderDetailRequest>> GetOrderDetail(int orderID);
+        Task<List<OrderDetailUpdate>> GetOrderDetail(int orderID);
+        Task<List<OrderDetailUpdate>> GetListOrderDetail();
 
-        Task<bool> Update(List<OrderDetailRequest> orderDetail);
+        Task<bool> Update(List<OrderDetailUpdate> orderDetail, int orderId);
         Task<bool> Create(List<OrderDetail> orderDetails, int orderID);
         bool Delete(int orderID, int productID);
     }

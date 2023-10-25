@@ -80,7 +80,7 @@ namespace Fooding_Shop.Controllers
         }
 
         [HttpGet("Details/{id}")]
-        public async Task<ActionResult<ProductModelView>> Details(int id)
+        public async Task<ActionResult<ProductRequest>> Details(int id)
         {
             try
             {
@@ -100,8 +100,8 @@ namespace Fooding_Shop.Controllers
             }
         }
 
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateAsync(ProductModelView productModelView)
+        [HttpPost("Update")]
+        public async Task<IActionResult> UpdateAsync(ProductRequest productRequest)
         {
             try
             {
@@ -113,11 +113,19 @@ namespace Fooding_Shop.Controllers
                     var userDataJson = Encoding.UTF8.GetString(userDataBytes);
                     user = JsonConvert.DeserializeObject<UserRequest>(userDataJson);
                 }
-
-                var product = await productService.UpdateAsync(productModelView, user.UserId);
-                if (product)
+                var isImage = checkImageService.IsImage(productRequest.ImgUrl);
+                if (isImage)
                 {
-                    return Ok(product);
+                    if (productRequest != null)
+                    {
+                        var result = await productService.UpdateAsync(productRequest, user.UserId);
+                        if (result)
+                        {
+                            return Ok(result);
+                        }
+                        return BadRequest();
+                    }
+                    return BadRequest("Need more product information");
                 }
                 return BadRequest();
             }
@@ -127,8 +135,8 @@ namespace Fooding_Shop.Controllers
             }
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPost("Delete")]
+        public async Task<IActionResult> Delete([FromBody] int id)
         {
             try
             {
@@ -146,8 +154,8 @@ namespace Fooding_Shop.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ProductModelView productModelView, IFormFile imageFile)
+        [HttpPost("Create")]
+        public async Task<IActionResult> Create(ProductRequest productRequest)
         {
             var session = httpContextAccessor.HttpContext.Session;
             var userDataBytes = session.Get("UserData");
@@ -157,18 +165,21 @@ namespace Fooding_Shop.Controllers
                 var userDataJson = Encoding.UTF8.GetString(userDataBytes);
                 user = JsonConvert.DeserializeObject<UserRequest>(userDataJson);
             }
-           // productModelView.ProductRequest.ImgUrl = "/Data/Image/" + imageFile.FileName;
-            //var isImage = checkImageService.IsImage(productModelView.ProductRequest.ImgUrl);
-            if (productModelView != null)
+            var isImage = checkImageService.IsImage(productRequest.ImgUrl);
+            if(isImage)
             {
-                var result = await productService.Create(productModelView, user.UserId);
-                if (result)
+                if (productRequest != null)
                 {
-                    return Ok(result);
+                    var result = await productService.Create(productRequest, user.UserId);
+                    if (result)
+                    {
+                        return Ok(result);
+                    }
+                    return BadRequest();
                 }
-                return BadRequest();
+                return BadRequest("Need more product information");
             }
-            return BadRequest();
+            return BadRequest("Not is a image");
         }
 
     }

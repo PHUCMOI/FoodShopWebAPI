@@ -136,15 +136,15 @@ namespace Fooding_Shop.Controllers
         }
 
         // GET: Users/Edit/5
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> Update(User user)
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update(List<UserRequest> userRequest)
         {
             try
             {
 
-                if (user != null)
+                if (userRequest != null)
                 {
-                    var result = await _userService.UpdateAsync(user);
+                    var result = await _userService.UpdateAsync(userRequest);
                     if (result)
                     {
                         return Ok(result);
@@ -159,7 +159,7 @@ namespace Fooding_Shop.Controllers
         }
 
         // GET: Users/Delete/5
-        [HttpDelete("Delete/{id}")]
+        [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try

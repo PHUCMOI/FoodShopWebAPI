@@ -84,7 +84,10 @@ public partial class FoodingShopContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.UserName).HasMaxLength(255);
         });
- entity
+
+        modelBuilder.Entity<OrderDetail>(entity =>
+        {
+            entity
                 .HasNoKey()
                 .ToTable("OrderDetail");
 
@@ -92,9 +95,6 @@ public partial class FoodingShopContext : DbContext
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
-        modelBuilder.Entity<OrderDetail>(entity =>
-        {
-           
         });
 
         modelBuilder.Entity<Product>(entity =>

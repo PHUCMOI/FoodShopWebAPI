@@ -108,7 +108,30 @@ namespace DataAccessLayer.DataAccess
             };
         }
 
-        public async Task<List<OrderDetailRequest>> GetOrderDetail(int orderID)
+        public async Task<List<OrderDetailUpdate>> GetListOrderDetail()
+        {
+            try
+            {
+                using (IDbConnection con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
+                {
+                    var query = $@"SELECT OrderID
+                                          ,ProductID
+                                          ,Quantity
+                                      FROM [dbo].[OrderDetail]
+                                      WHERE IsDeleted <> 1 ";
+                    var orderDetail = await con.QueryAsync<OrderDetailUpdate>(query);
+                    orderDetail.ToList();                   
+
+                    return (List<OrderDetailUpdate>)orderDetail;
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<OrderDetailUpdate>> GetOrderDetail(int orderID)
         {
             try
             {
@@ -125,19 +148,20 @@ namespace DataAccessLayer.DataAccess
                                       FROM [dbo].[OrderDetail]
                                       WHERE OrderID = {orderID}
                                       AND IsDeleted <> 1 ";
-                    var orderDetail = await con.QueryAsync<OrderDetailRequest>(query, new { Id = orderID });
+                    var orderDetail = await con.QueryAsync<OrderDetailUpdate>(query, new { Id = orderID });
                     orderDetail.ToList();
 
                     foreach (var order in orderDetail)
                     {
                         var product = await productDAO.GetProduct((int)order.ProductId);
-                        order.Products = new ProductRequest();
-                        order.Products.ProductName = product.ProductName;
-                        order.Products.ProductCategory = product.ProductCategory;
-                        order.Products.Price = product.Price;
+                        order.Product = new ProductRequest();
+                        order.Product.ProductId = product.ProductId;
+                        order.Product.ProductName = product.ProductName;
+                        order.Product.ProductCategory = product.ProductCategory;
+                        order.Product.Price = product.Price;
                     }                   
 
-                    return (List<OrderDetailRequest>)orderDetail;
+                    return (List<OrderDetailUpdate>)orderDetail;
                 };
             }
             catch (Exception ex)
@@ -146,7 +170,7 @@ namespace DataAccessLayer.DataAccess
             }
         }
 
-        public async Task<bool> Update(List<OrderDetailRequest> orderDetail)
+        public async Task<bool> Update(List<OrderDetailUpdate> orderDetail, int orderId)
         {
             using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
             {
@@ -165,7 +189,7 @@ namespace DataAccessLayer.DataAccess
                             command.CommandType = CommandType.Text;
                             command.Parameters.Clear();
                             command.Parameters.Add(new SqlParameter("@Quantity", order.Quantity));
-                            command.Parameters.Add(new SqlParameter("@OrderID", order.OrderId));
+                            command.Parameters.Add(new SqlParameter("@OrderID", orderId));
                             command.Parameters.Add(new SqlParameter("@ProductID", order.ProductId));
                             await _foodContext.Database.OpenConnectionAsync();
                             command.ExecuteNonQuery();

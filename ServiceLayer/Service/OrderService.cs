@@ -16,40 +16,13 @@ namespace Services_Layer.Service
     {
         private readonly IOrderDetailDAO orderDetailDAO;
         private readonly IOrderDAO orderDAO;
-        public OrderService(IOrderDAO orderDAO, IOrderDetailDAO orderDetailDAO)
+        private readonly IUserDAO userDAO;
+        public OrderService(IOrderDAO orderDAO, IOrderDetailDAO orderDetailDAO, IUserDAO userDAO)
         {
             this.orderDAO = orderDAO;
             this.orderDetailDAO = orderDetailDAO;
-        }
-        public async Task<bool> CreateProductCart(CartRequest cartRequest)
-        {
-            try
-            {
-                if (cartRequest != null)
-                {                    
-                    var cart = new Cart()
-                    {
-                        
-                    };                    
-
-                    var result = await orderDAO.CreateCart(cart);
-                    if (result)
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                else
-                {
-                    throw new Exception("Order is null");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-        }
+            this.userDAO = userDAO;
+        }        
 
         public async Task<bool> Create(PurchaseOrderRequest purchaseOrderRequest)
         {
@@ -58,39 +31,39 @@ namespace Services_Layer.Service
                 if(purchaseOrderRequest != null)
                 {
                     var Message = string.Empty;
-                    if(purchaseOrderRequest.OrderRequest.Message == null)
+                    if(purchaseOrderRequest.Message == null)
                     {
                         Message = "None";
                     }
                     else
                     {
-                        Message = purchaseOrderRequest.OrderRequest.Message;
+                        Message = purchaseOrderRequest.Message;
                     }
                     var order = new Order()
                     {
-                        UserId = purchaseOrderRequest.UserRequest.UserId,
-                        UserName = purchaseOrderRequest.UserRequest.UserName,
-                        Address = purchaseOrderRequest.OrderRequest.Address,
-                        TotalPrice = purchaseOrderRequest.OrderRequest.TotalPrice,
-                        PayMethod = purchaseOrderRequest.OrderRequest.PayMethod,
+                        UserId = purchaseOrderRequest.User.UserId,
+                        UserName = purchaseOrderRequest.User.UserName,
+                        Address = purchaseOrderRequest.User.Address,
+                        TotalPrice = purchaseOrderRequest.TotalPrice,
+                        PayMethod = purchaseOrderRequest.PayMethod,
                         Message = Message,
                         Status = "Prepare",
-                        CreateBy = purchaseOrderRequest.UserRequest.UserId,
+                        CreateBy = purchaseOrderRequest.User.UserId,
                         CreateDate = DateTime.Now,
-                        UpdateBy = purchaseOrderRequest.UserRequest.UserId,
+                        UpdateBy = purchaseOrderRequest.User.UserId,
                         UpdateDate = DateTime.Now,
                         IsDeleted = false
                     };
 
                     List<OrderDetail> orderDetails = new List<OrderDetail>();
-                    foreach(var orderRequest in purchaseOrderRequest.OrderDetails)
+                    foreach(var orderRequest in purchaseOrderRequest.OrderDetail)
                     {
                         var orderDetail = new OrderDetail();
                         orderDetail.ProductId = orderRequest.ProductId;
                         orderDetail.Quantity = orderRequest.Quantity;
-                        orderDetail.CreateBy = purchaseOrderRequest.UserRequest.UserId;
+                        orderDetail.CreateBy = purchaseOrderRequest.User.UserId;
                         orderDetail.CreateDate = DateTime.Now;
-                        orderDetail.UpdateBy = purchaseOrderRequest.UserRequest.UserId;
+                        orderDetail.UpdateBy = purchaseOrderRequest.User.UserId;
                         orderDetail.UpdateDate = DateTime.Now; 
                         orderDetail.IsDeleted = false;
 
@@ -122,26 +95,26 @@ namespace Services_Layer.Service
             return orderList;
         }
 
-        public async Task<OrderDetailModelView> GetOrderByID(int id)
+        public async Task<UpdateOrderRequest> GetOrderByID(int id)
         {
             var order = await orderDAO.GetOrder(id);
             var orderDetail = await orderDetailDAO.GetOrderDetail(id);
             decimal totalPrice = 0;
             for (int i = 0; i < orderDetail.Count; i++)
             {
-                totalPrice += orderDetail[i].Products.Price.Value * orderDetail[i].Quantity.Value;
+                totalPrice += orderDetail[i].Product.Price.Value * orderDetail[i].Quantity;
             }
-            order.order.TotalPrice = Convert.ToInt64(totalPrice).ToString();
+            order.TotalPrice = Convert.ToInt64(totalPrice).ToString();
             return order;
         }
 
-        public async Task<bool> Update(OrderDetailModelView orderDetailModelView)
+        public async Task<bool> Update(UpdateOrderRequest updateOrderRequest)
         {
             int userID = 1; // Temporary parameter
-            if (orderDetailModelView != null)
+            if (updateOrderRequest != null)
             {
-                var totalPrice = Convert.ToDecimal(orderDetailModelView.order.TotalPrice);
-                var result = await orderDAO.UpdateAsync(orderDetailModelView, userID, totalPrice);
+                var totalPrice = Convert.ToDecimal(updateOrderRequest.TotalPrice);
+                var result = await orderDAO.UpdateAsync(updateOrderRequest, userID, totalPrice);
                 if (result)
                 {
                     return true;
@@ -154,16 +127,16 @@ namespace Services_Layer.Service
             }
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
             try
             {
-                bool flag = orderDAO.Delete(id);
+                bool flag = await orderDAO.Delete(id);
                 if (flag)
                 {
-                    return Task.FromResult(true);
+                    return true;
                 }
-                return Task.FromResult(false);
+                return false;
             }
             catch (Exception ex)
             {

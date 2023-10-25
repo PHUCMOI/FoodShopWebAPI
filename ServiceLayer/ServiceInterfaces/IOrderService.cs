@@ -13,11 +13,10 @@ namespace Services_Layer.ServiceInterfaces
 {
     public interface IOrderService
     {
-        Task<bool> CreateProductCart(CartRequest cart);
         Task<bool> Create(PurchaseOrderRequest purchaseOrderRequest);
         Task<List<OrderRequest>> GetOrderList();
-        Task<OrderDetailModelView> GetOrderByID(int id);
-        Task<bool> Update(OrderDetailModelView orderDetailModelView);
+        Task<UpdateOrderRequest> GetOrderByID(int id);
+        Task<bool> Update(UpdateOrderRequest updateOrderRequest);
         Task<bool> Delete(int id);
         Task<bool> DeleteOrderDetail(int OrderID, int productID);
 

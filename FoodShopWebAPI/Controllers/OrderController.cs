@@ -29,7 +29,7 @@ namespace Fooding_Shop.Controllers
         }
         // GET: OrderController
         [HttpGet]
-        public async Task<ActionResult<List<OrderRequest>>> Index()
+        public async Task<ActionResult<List<OrderRequest>>> GetListOrder()
         {
             try
             {
@@ -51,7 +51,7 @@ namespace Fooding_Shop.Controllers
 
         // GET: OrderController/Details/5
         [HttpGet("Details/{id}")]
-        public async Task<ActionResult<OrderDetailModelView>> Details(int id)
+        public async Task<ActionResult<UpdateOrderRequest>> Details(int id)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace Fooding_Shop.Controllers
         }
 
         // POST: OrderController/Create
-        [HttpPost("Create/{id}")]
+        [HttpPost("Create")]
         public async Task<ActionResult> CreateAsync(PurchaseOrderRequest purchaseOrderRequest)
         {
             try
@@ -92,37 +92,16 @@ namespace Fooding_Shop.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        [HttpPost("AddToCart")]
-        public async Task<ActionResult> AddToCart(CartRequest cart)
-        {
-            try
-            {
-                if (cart != null)
-                {
-                    var result = await orderService.CreateProductCart(cart);
-                    if (result)
-                    {
-                        return Ok(result);
-                    }
-                }
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
+        
         // GET: OrderController/Edit/5
-        [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(OrderDetailModelView orderDetailModelView)
+        [HttpPost("Update")]
+        public async Task<ActionResult> Update(UpdateOrderRequest updateOrderRequest)
         {
             try
             {
-                if(orderDetailModelView != null)
+                if(updateOrderRequest != null)
                 {
-                    var result = await orderService.Update(orderDetailModelView);
+                    var result = await orderService.Update(updateOrderRequest);
                     if (result)
                     {
                         return Ok(result);  
@@ -137,8 +116,8 @@ namespace Fooding_Shop.Controllers
         }
 
         // POST: OrderController/Delete/5
-        [HttpDelete("DeleteOrder/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPost("Delete")]
+        public async Task<IActionResult> Delete([FromBody] int id)
         {
             try
             {
@@ -157,14 +136,14 @@ namespace Fooding_Shop.Controllers
                 return NotFound(ex.Message);
             }
         }
-        [HttpDelete("DeleteOrderDetail/{id}")]
-        public async Task<IActionResult> DeleteOrderDetail(int orderID, int productID)
+        [HttpPost("DeleteOrderDetail")]
+        public async Task<IActionResult> DeleteOrderDetail(DeleteOrderDetail deleteOrderDetail)
         {
             try
             {
-                if (orderID > 0 && productID > 0)
+                if (deleteOrderDetail != null)
                 {
-                    var result = await orderService.DeleteOrderDetail(orderID, productID);
+                    var result = await orderService.DeleteOrderDetail(deleteOrderDetail.orderId, deleteOrderDetail.productId);
                     if (result)
                     {
                         return Ok(result);

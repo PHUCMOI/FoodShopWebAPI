@@ -197,22 +197,27 @@ namespace Services_Layer.Service
         }
 
         // login 1. check username 1.1 get in4 2. check pass
-        public async Task<bool> UpdateAsync(User user)
+        public async Task<bool> UpdateAsync(List<UserRequest> userRequest)
         {
-            if (user != null)
+            if (userRequest != null)
             {
-                var userRequest = new User()
+                int count = 0;
+                foreach(var user in userRequest)
                 {
-                    UserId = user.UserId,
-                    UserName = user.UserName,
-                    Password = user.Password,
-                    PhoneNumber = user.PhoneNumber,
-                    Role = user.Role,
-                    CreateBy = user.CreateBy,
-                    CreateDate = user.CreateDate
-                };
-                var result = await userDAO.UpdateAsync(user, user.UserId);
-                if (result)
+                    var tempUser = new User()
+                    {
+                        UserId = user.UserId,
+                        UserName = user.UserName,
+                        Password = user.Password,
+                        PhoneNumber = user.PhoneNumber,
+                        Role = user.Role,
+                        Status = user.Status
+                    };
+                    await userDAO.UpdateAsync(tempUser, tempUser.UserId);
+                    count++;
+                }
+                
+                if (count == userRequest.Count)
                 {
                     return true;
                 }

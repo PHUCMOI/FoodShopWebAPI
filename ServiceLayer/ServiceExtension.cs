@@ -12,6 +12,9 @@ using Services_Layer.Service;
 using Services_Layer.ServiceInterfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using ServiceLayer.Service;
+using ServiceLayer.ServiceInterfaces;
+using Microsoft.Extensions.FileProviders;
 
 namespace Services_Layer
 {
@@ -27,6 +30,10 @@ namespace Services_Layer
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ICheckImageService, CheckImageService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IAutoMapperService, AutoMapperService>();
+            services.AddScoped<IDashboardService, DashboardService>();
+
 
             // Data Access
             services.AddScoped<IProductDAO, ProductDAO>();
@@ -34,8 +41,9 @@ namespace Services_Layer
             services.AddScoped<IUserDAO, UserDAO>();
             services.AddScoped<IOrderDAO, OrderDAO>();
             services.AddScoped<IOrderDetailDAO, OrderDetailDAO>();
+            services.AddScoped<ICartDAO, CartDAO>();
+            services.AddScoped<IDashboardDAO, DashboardDAO>();
 
-            services.AddScoped<IAutoMapperService, AutoMapperService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSession(options =>

@@ -13,9 +13,9 @@ namespace Services_Layer.ServiceInterfaces
     {
         Task<List<ProductRequest>> SearchProducts(string value, decimal? minPrice, decimal? maxPrice);
         Task<List<ProductRequest>> GetProductList();
-        Task<ProductModelView> GetProductByID(int id);
-        Task<bool> UpdateAsync(ProductModelView productModelView, int userId);
+        Task<ProductRequest> GetProductByID(int id);
+        Task<bool> UpdateAsync(ProductRequest product, int userId);
         Task<bool> Delete(int id);
-        Task<bool> Create(ProductModelView product, int userID);
+        Task<bool> Create(ProductRequest product, int userID);
     }
 }

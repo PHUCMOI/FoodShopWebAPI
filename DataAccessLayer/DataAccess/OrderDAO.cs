@@ -4,6 +4,7 @@ using Fooding_Shop.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using ModelLayer.Models;
 using Models_Layer.ModelRequest;
 using Models_Layer.ModelResponse;
 using System;
@@ -20,13 +21,15 @@ namespace DataAccessLayer.DataAccess
         private readonly IConfiguration configuration;
         private readonly IOrderDetailDAO orderDetailDAO;
         private readonly IProductDAO productDAO;
+        private readonly IUserDAO userDAO;
         private readonly FoodingShopContext _foodContext;
-        public OrderDAO(IConfiguration configuration, IOrderDetailDAO orderDetailDAO, FoodingShopContext foodContext, IProductDAO productDAO)
+        public OrderDAO(IConfiguration configuration, IOrderDetailDAO orderDetailDAO, FoodingShopContext foodContext, IProductDAO productDAO, IUserDAO userDAO)
         {
             this.configuration = configuration;
             this.orderDetailDAO = orderDetailDAO;
             _foodContext = foodContext;
             this.productDAO = productDAO;
+            this.userDAO = userDAO;
         }
         public async Task<bool> Create(Order order, List<OrderDetail> orderDetails)
         {
@@ -98,9 +101,9 @@ namespace DataAccessLayer.DataAccess
                     throw new Exception(ex.Message);
                 }
             }
-        }
+        }        
 
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
             using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
             {
@@ -113,6 +116,14 @@ namespace DataAccessLayer.DataAccess
                                   SET IsDeleted = 1
                                   WHERE OrderID = @OrderID";
 
+                        command.Parameters.Add(new SqlParameter("@OrderID", id));
+                        command.CommandText = query;
+                        command.ExecuteNonQuery();
+
+                        command.Parameters.Clear();
+                        var queryDetail = @"UPDATE [dbo].[OrderDetail]
+                                  SET IsDeleted = 1
+                                  WHERE OrderID = @OrderID";
                         command.Parameters.Add(new SqlParameter("@OrderID", id));
                         command.CommandText = query;
                         command.ExecuteNonQuery();
@@ -138,7 +149,8 @@ namespace DataAccessLayer.DataAccess
                                          Address,
                                          PayMethod,
                                          TotalPrice,
-                                         Status
+                                         Status,
+                                         Message
                                       FROM [dbo].[Order]
                                       WHERE IsDeleted = 0";
                     var orderList = await con.QueryAsync<OrderRequest>(query);
@@ -151,13 +163,14 @@ namespace DataAccessLayer.DataAccess
             }
         }
 
-        public async Task<OrderDetailModelView> GetOrder(int id)
+        public async Task<UpdateOrderRequest> GetOrder(int id)
         {
             try
             {
                 using (IDbConnection con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
                 {
                     var query = $@"SELECT OrderID
+                                         ,UserID
                                          ,UserName
                                          ,Address
                                          ,PayMethod
@@ -174,12 +187,24 @@ namespace DataAccessLayer.DataAccess
                     var order = await con.QuerySingleOrDefaultAsync<Order>(query, new { Id = id });
                     var orderDetail = await orderDetailDAO.GetOrderDetail(order.OrderId);
                     var productlist = await productDAO.GetListProduct();
-                    return new OrderDetailModelView()
+                    var user = await userDAO.GetUser((int)order.UserId);
+                    var userCheckout = new UserCheckout()
                     {
-                        order = order,
-                        orderDetails = orderDetail,
-                        products = productlist
+                        UserId = (int)order.UserId,
+                        UserName = order.UserName,
+                        Address = order.Address,
+                        PhoneNumber = user.PhoneNumber
                     };
+                    return new UpdateOrderRequest()
+                    {
+                        OrderId = order.OrderId,
+                        UserId = (int)order.UserId,
+                        PayMethod = order.PayMethod,
+                        Status = order.Status,
+                        Message = order.Message,
+                        TotalPrice = order.TotalPrice,
+                        OrderDetail = orderDetail,
+                        User = userCheckout                    };
                 };
             }
             catch (Exception ex)
@@ -188,7 +213,7 @@ namespace DataAccessLayer.DataAccess
             }
         }
 
-        public async Task<bool> UpdateAsync(OrderDetailModelView orderDetailModelView, int userID, decimal totalPrice)
+        public async Task<bool> UpdateAsync(UpdateOrderRequest updateOrderRequest, int userID, decimal totalPrice)
         {
             using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
             {
@@ -206,8 +231,6 @@ namespace DataAccessLayer.DataAccess
                               ,PayMethod = @PayMethod
                               ,Status = @Status
                               ,Message = @Message
-                              ,CreateBy = @CreateBy
-                              ,CreateDate = @CreateDate
                               ,UpdateBy = @UpdateBy
                               ,UpdateDate = @UpdateDate
                               ,IsDeleted = @IsDeleted
@@ -215,25 +238,23 @@ namespace DataAccessLayer.DataAccess
 
                         command.CommandText = query;
 
-                        command.Parameters.Add(new SqlParameter("@UserName", orderDetailModelView.order.UserName));
-                        command.Parameters.Add(new SqlParameter("@Address", orderDetailModelView.order.Address));
+                        command.Parameters.Add(new SqlParameter("@UserName", updateOrderRequest.User.UserName));
+                        command.Parameters.Add(new SqlParameter("@Address", updateOrderRequest.User.Address));
                         command.Parameters.Add(new SqlParameter("@TotalPrice", totalPrice.ToString()));
-                        command.Parameters.Add(new SqlParameter("@PayMethod", orderDetailModelView.order.PayMethod));
-                        command.Parameters.Add(new SqlParameter("@Status", orderDetailModelView.order.Status));
-                        command.Parameters.Add(new SqlParameter("@Message", orderDetailModelView.order.Message));
-                        command.Parameters.Add(new SqlParameter("@CreateBy", orderDetailModelView.order.CreateBy));
-                        command.Parameters.Add(new SqlParameter("@CreateDate", orderDetailModelView.order.CreateDate));
+                        command.Parameters.Add(new SqlParameter("@PayMethod", updateOrderRequest.PayMethod));
+                        command.Parameters.Add(new SqlParameter("@Status", updateOrderRequest.Status));
+                        command.Parameters.Add(new SqlParameter("@Message", updateOrderRequest.Message));
                         command.Parameters.Add(new SqlParameter("@IsDeleted", false));
                         command.Parameters.Add(new SqlParameter("@UpdateBy", userID));
                         command.Parameters.Add(new SqlParameter("@UpdateDate", DateTime.Now));
-                        command.Parameters.Add(new SqlParameter("@OrderID", orderDetailModelView.order.OrderId));
+                        command.Parameters.Add(new SqlParameter("@OrderID", updateOrderRequest.OrderId));
 
                         var result = await command.ExecuteNonQueryAsync();
                         if(result != null)
                         {
                             try
                             {
-                                var flag = await orderDetailDAO.Update(orderDetailModelView.orderDetails);
+                                var flag = await orderDetailDAO.Update(updateOrderRequest.OrderDetail, updateOrderRequest.OrderId);
                                 if (flag)
                                 {
                                     return true;
