@@ -76,6 +76,12 @@ namespace Services_Layer.Service
             }
         }
 
+        public async Task<List<ProductRequest>> GetProductByCategoryName(string categoryName)
+        {
+            var productList = await productDAO.GetProductByCategoryName(categoryName);
+            return productList;
+        }
+
         public async Task<ProductRequest> GetProductByID(int id)
         {
             var product = await productDAO.GetProduct(id);

@@ -145,6 +145,7 @@ namespace DataAccessLayer.DataAccess
                 using (SqlConnection con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
                 {
                     var query = @"SELECT OrderID,
+                                         UserId,
                                          UserName,
                                          Address,
                                          PayMethod,

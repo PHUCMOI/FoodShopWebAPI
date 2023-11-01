@@ -17,5 +17,6 @@ namespace Services_Layer.ServiceInterfaces
         Task<bool> UpdateAsync(ProductRequest product, int userId);
         Task<bool> Delete(int id);
         Task<bool> Create(ProductRequest product, int userID);
+        Task<List<ProductRequest>> GetProductByCategoryName(string categoryName);
     }
 }

@@ -136,6 +136,7 @@ namespace Fooding_Shop.Controllers
                 return NotFound(ex.Message);
             }
         }
+
         [HttpPost("DeleteOrderDetail")]
         public async Task<IActionResult> DeleteOrderDetail(DeleteOrderDetail deleteOrderDetail)
         {

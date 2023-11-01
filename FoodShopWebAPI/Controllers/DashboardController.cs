@@ -43,5 +43,19 @@ namespace FoodShopWebAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet]
+        public async Task<ActionResult<List<PieChartData>>> DashboardData()
+        {
+            try
+            {
+                var data = await dashboardService.DashboardData();
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -75,7 +75,7 @@ namespace Fooding_Shop.Controllers
             {
                 var userList = await _userService.GetUserList();
                 if (userList != null)
-                {
+                {   
                     return Ok(userList);
                 }
                 else
@@ -137,14 +137,14 @@ namespace Fooding_Shop.Controllers
 
         // GET: Users/Edit/5
         [HttpPost("Update")]
-        public async Task<IActionResult> Update(List<UserRequest> userRequest)
+        public async Task<IActionResult> Update(UpdateUser updateUser)
         {
             try
             {
 
-                if (userRequest != null)
+                if (updateUser != null)
                 {
-                    var result = await _userService.UpdateAsync(userRequest);
+                    var result = await _userService.UpdateAsync(updateUser);    
                     if (result)
                     {
                         return Ok(result);

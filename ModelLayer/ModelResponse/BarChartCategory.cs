@@ -10,6 +10,6 @@ namespace ModelLayer.ModelResponse
     public class BarChartCategory
     {
         public string Category {  get; set; }
-        public int Count { get; set; }
+        public int TotalQuantity { get; set; }
     }
 }

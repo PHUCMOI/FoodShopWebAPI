@@ -13,7 +13,7 @@ namespace Services_Layer.ServiceInterfaces
     {
         Task<List<UserRequest>> GetUserList();
         Task<UserRequest> GetUserByID(int id);
-        Task<bool> UpdateAsync(List<UserRequest> user);
+        Task<bool> UpdateAsync(UpdateUser user);
         Task<bool> Delete(int id);
         Task<bool> Create(UserRequest user);
         Task<UserRequest> GetUserByUserName(string username);

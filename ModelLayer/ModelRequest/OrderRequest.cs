@@ -19,7 +19,7 @@ namespace Models_Layer.ModelRequest
         [StringLength(100, ErrorMessage = "Message cannot exceed 100 characters.")]
         public string? Message { get; set; }
 
-        public string? TotalPrice { get; set; }
+        public decimal? TotalPrice { get; set; }
 
         public string? PayMethod { get; set; }
 

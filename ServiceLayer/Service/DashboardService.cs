@@ -15,45 +15,46 @@ namespace ServiceLayer.Service
         private readonly ICategoryDAO categoryDAO;    
         private readonly IProductDAO productDAO;
         private readonly IOrderDetailDAO orderDetailDAO;
-        public DashboardService(ICategoryDAO categoryDAO, IProductDAO productDAO, IOrderDetailDAO orderDetailDAO) 
+        private readonly IOrderDAO orderDAO;
+        private readonly IUserDAO userDAO;
+        private readonly IDashboardDAO dashboardDAO;
+        public DashboardService(ICategoryDAO categoryDAO, IProductDAO productDAO, IOrderDetailDAO orderDetailDAO, IOrderDAO orderDAO, IUserDAO userDAO, IDashboardDAO dashboardDAO) 
         {
             this.categoryDAO = categoryDAO;
             this.productDAO = productDAO;
             this.orderDetailDAO = orderDetailDAO;
+            this.orderDAO = orderDAO;
+            this.userDAO = userDAO;
+            this.dashboardDAO = dashboardDAO;
+        }
+
+        public async Task<Dashboard> DashboardData()
+        {
+            try
+            {
+                var totalIncome = await dashboardDAO.TotalIncome();
+                var topProductSellers = await dashboardDAO.topProducts();
+                var topCustomer = await dashboardDAO.topCustomers();
+
+                var dashboardData = new Dashboard()
+                {
+                    TotalIncome = totalIncome,
+                    TopProductSellers = topProductSellers, 
+                    TopCustomer = topCustomer,
+                };
+                return dashboardData;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<List<BarChartCategory>> GetDataBarChart()
         {
             try 
             {
-                var categories = await categoryDAO.GetListCategory();
-                var products = await productDAO.GetListProduct();
-                var orderDetails = await orderDetailDAO.GetListOrderDetail();
-                var categoryQuantities = categories
-                        .GroupJoin(
-                            products,
-                            category => category.CategoryName,
-                            product => product.ProductCategory,
-                            (category, productGroup) => new
-                            {
-                                Category = category,
-                                TotalQuantity = productGroup
-                                    .SelectMany(product => orderDetails
-                                        .Where(orderDetail => orderDetail.ProductId == product.ProductId))
-                                    .Sum(orderDetail => orderDetail.Quantity)
-                            }
-                        );
-
-                var barchartData = new List<BarChartCategory>();
-                foreach (var categoryQuantity in categoryQuantities)
-                {
-                    var barchartItem = new BarChartCategory()
-                    {
-                        Category = categoryQuantity.Category.CategoryName,
-                        Count = categoryQuantity.TotalQuantity                        
-                    };
-                    barchartData.Add(barchartItem);
-                }
+                var barchartData = await dashboardDAO.BarChartData();
                 return barchartData;
             }
             catch (Exception ex)

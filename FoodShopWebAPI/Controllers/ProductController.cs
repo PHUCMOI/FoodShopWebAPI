@@ -105,6 +105,7 @@ namespace Fooding_Shop.Controllers
         {
             try
             {
+                bool isImage = true;
                 var session = httpContextAccessor.HttpContext.Session;
                 var userDataBytes = session.Get("UserData");
                 UserRequest user = new UserRequest();
@@ -113,7 +114,11 @@ namespace Fooding_Shop.Controllers
                     var userDataJson = Encoding.UTF8.GetString(userDataBytes);
                     user = JsonConvert.DeserializeObject<UserRequest>(userDataJson);
                 }
-                var isImage = checkImageService.IsImage(productRequest.ImgUrl);
+                if(productRequest.ImgUrl != null)
+                {
+                    isImage = checkImageService.IsImage(productRequest.ImgUrl);
+
+                }
                 if (isImage)
                 {
                     if (productRequest != null)
@@ -180,6 +185,27 @@ namespace Fooding_Shop.Controllers
                 return BadRequest("Need more product information");
             }
             return BadRequest("Not is a image");
+        }
+
+        [HttpGet("categoryName/{categoryName}")]
+        public async Task<ActionResult<List<ProductRequest>>> GetProductsByCategoryName(string categoryName)
+        {
+            try
+            {
+                var product = await productService.GetProductByCategoryName(categoryName);
+                if (product != null)
+                {
+                    return product;
+                }
+                else
+                {
+                    return BadRequest("product is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

@@ -11,6 +11,6 @@ namespace ServiceLayer.ServiceInterfaces
     {
         Task<List<PieChartData>> GetDataPieChart();
         Task<List<BarChartCategory>> GetDataBarChart();
-
+        Task<Dashboard> DashboardData();
     }
 }

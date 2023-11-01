@@ -168,7 +168,7 @@ namespace DataAccessLayer.DataAccess
             {
                 query += @"AND (ProductName LIKE '%' + @ProductName + '%'  OR ProductCategory LIKE '%' + @ProductCategory + '%' OR Description LIKE '%' + @Description + '%')";
             }
-            if (minPrice != null && maxPrice != null)
+            if ((minPrice != null && maxPrice != null))
             {
                 query += @"AND Price >= @MinPrice AND Price <= @MaxPrice";
             }
@@ -258,6 +258,31 @@ namespace DataAccessLayer.DataAccess
                 {
                     throw new Exception("Sql Query Error\n" + ex.Message);
                 }
+            }
+        }
+
+        public async Task<List<ProductRequest>> GetProductByCategoryName(string categoryName)
+        {
+            try
+            {
+                using (IDbConnection con = new SqlConnection(_configuration.GetConnectionString("FoodingShopDB")))
+                {
+                    var query = $@"SELECT ProductID
+                                          ,ProductName
+                                          ,ProductCategory
+                                          ,Description
+                                          ,Price
+                                          ,ImgURL
+                                      FROM Products
+                                      WHERE ProductCategory = '{categoryName}' AND IsDeleted = 0";
+                    var product = await con.QueryAsync<ProductRequest>(query);
+
+                    return product.ToList();
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

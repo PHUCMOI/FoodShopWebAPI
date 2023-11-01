@@ -197,7 +197,6 @@ namespace DataAccessLayer.DataAccess
                     {
                         var query = @"UPDATE [dbo].[User]
                           SET UserName = @UserName,
-                              Password = @Password,
                               Role = @Role,
                               PhoneNumber = @PhoneNumber,
                               Status = @Status,
@@ -209,7 +208,6 @@ namespace DataAccessLayer.DataAccess
                         command.CommandText = query;
                         // Add parameters
                         command.Parameters.Add(new SqlParameter("@UserName", user.UserName));
-                        command.Parameters.Add(new SqlParameter("@Password", user.Password));
                         command.Parameters.Add(new SqlParameter("@Role", user.Role));
                         command.Parameters.Add(new SqlParameter("@PhoneNumber", user.PhoneNumber));
                         command.Parameters.Add(new SqlParameter("@Status", user.Status));
@@ -220,11 +218,12 @@ namespace DataAccessLayer.DataAccess
 
                         await _foodContext.Database.OpenConnectionAsync();
                         var result = command.ExecuteNonQuery();
-                        con.Close();
                         if (result != null)
                         {
+                            con.Close();
                             return true;
                         }
+                        con.Close();
                         return false;
                     }
                 }

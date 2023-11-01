@@ -27,6 +27,7 @@ namespace DataAccessLayer.DataAccess
             {
                 try
                 {
+                    int count = 0;
                     using (var command = con.CreateCommand())
                     {
                         await con.OpenAsync();
@@ -63,15 +64,19 @@ namespace DataAccessLayer.DataAccess
                             command.Parameters.Add(new SqlParameter("@UpdateDate", order.UpdateDate));
 
                             var result = command.ExecuteNonQuery();
-                            con.Close();
                             if(result != null)
                             {
-                                return true;
-                            }
-                            return false;
+                                count++;
+                            }                            
                         }
+                        if (count == orderDetails.Count)
+                        {
+                            con.Close();
+                            return true;
+                        }
+                        con.Close();
+                        return false;
                     }
-                    return false;
                 }
                 catch (Exception ex)
                 {

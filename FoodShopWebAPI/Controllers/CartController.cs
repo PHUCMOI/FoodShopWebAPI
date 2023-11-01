@@ -106,23 +106,23 @@ namespace FoodShopWebAPI.Controllers
         }
 
         [HttpPost("clearCart")]
-        public async Task<ActionResult> ClearCart([FromBody] int userId)
+        public async Task<IActionResult> ClearCart([FromBody] int id)
         {
             try
             {
-                if (userId > 0)
+                if (id > 0)
                 {
-                    var result = await cartService.ClearCart(userId);
+                    var result = await cartService.ClearCart(id);
                     if (result)
                     {
-                        return Ok(result);
+                        return Ok(result);  
                     }
                 }
                 return BadRequest();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
         }
     }
