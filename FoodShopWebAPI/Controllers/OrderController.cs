@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.ModelRequest;
 using ModelLayer.Models;
+using ModelLayer.PayPalModel;
 using Models_Layer.ModelRequest;
 using Models_Layer.ModelResponse;
 using Newtonsoft.Json;
+using ServiceLayer.ServiceInterfaces;
 using Services_Layer.Service;
 using Services_Layer.ServiceInterfaces;
 using System.Text;
@@ -21,11 +23,13 @@ namespace Fooding_Shop.Controllers
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IOrderService orderService;
         private readonly IProductService productService;
-        public OrderController(IOrderService orderService, IProductService productService, IHttpContextAccessor httpContextAccessor)
+        private readonly IPaypalService paypalService;
+        public OrderController(IOrderService orderService, IProductService productService, IHttpContextAccessor httpContextAccessor, IPaypalService paypalService)
         {
             this.orderService = orderService;
             this.productService = productService;
             this.httpContextAccessor = httpContextAccessor;
+            this.paypalService = paypalService;
         }
         // GET: OrderController
         [HttpGet]
@@ -80,9 +84,9 @@ namespace Fooding_Shop.Controllers
                 if(purchaseOrderRequest != null)
                 {
                     var result = await orderService.Create(purchaseOrderRequest);
-                    if (result)
+                    if (result != 0)
                     {
-                        return Ok(result);
+                        return Ok(true);
                     }
                 }
                 return BadRequest() ;
@@ -159,5 +163,40 @@ namespace Fooding_Shop.Controllers
             
         }
 
+        [HttpPost("paypal")]
+        public async Task<ActionResult<PayPalPayment>> PaymentPayPal(PurchaseOrderRequest purchaseOrderRequest)
+        {
+            try
+            {
+                if(purchaseOrderRequest != null)
+                {
+                    var payment = await paypalService.CreatePaymentUrl(purchaseOrderRequest);
+                    return Ok(payment);
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("PaymentSuccess")]
+        public async Task<IActionResult> PaymentSuccess([FromQuery] int orderId, int userId)
+        {
+            await orderService.UpdateOrderStatus(orderId, "Paid", userId);
+
+            return Redirect("http://localhost:4200/product");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("PaymentFail")]
+        public async Task<IActionResult> PaymentFail([FromQuery] int orderId)
+        {
+            await orderService.UpdateOrderStatus(orderId, "Prepare", 0);
+
+            return Ok(false);
+        }
     }
 }

@@ -33,7 +33,10 @@ namespace Services_Layer
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IAutoMapperService, AutoMapperService>();
             services.AddScoped<IDashboardService, DashboardService>();
-
+            services.AddScoped<IPaypalService, PaypalService>();
+            services.AddScoped<IRestaurantService,  RestaurantService>();
+            services.AddScoped<IRestaurantMapService, RestaurantMapService>();
+            services.AddScoped<IReservationService, ReservationService>();
 
             // Data Access
             services.AddScoped<IProductDAO, ProductDAO>();
@@ -43,7 +46,9 @@ namespace Services_Layer
             services.AddScoped<IOrderDetailDAO, OrderDetailDAO>();
             services.AddScoped<ICartDAO, CartDAO>();
             services.AddScoped<IDashboardDAO, DashboardDAO>();
-
+            services.AddScoped<IRestaurantDAO, RestaurantDAO>();
+            services.AddScoped<IRestaurantMapDAO, RestaurantMapDAO>();
+            services.AddScoped<IReservationDAO, ReservationDAO>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSession(options =>

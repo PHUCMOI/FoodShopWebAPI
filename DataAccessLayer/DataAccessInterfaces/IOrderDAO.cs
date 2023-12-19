@@ -14,9 +14,9 @@ namespace DataAccessLayer.DataAccessInterfaces
     {
         Task<List<OrderRequest>> GetAllOrders();
         Task<UpdateOrderRequest> GetOrder(int id);
-        Task<bool> Create(Order order, List<OrderDetail> orderDetails);
+        Task<int> Create(Order order, List<OrderDetail> orderDetails);
         Task<bool> UpdateAsync(UpdateOrderRequest updateOrderRequest, int userID, decimal totalPrice);
         Task<bool> Delete(int id);
-
+        void UpdateOrderStatus(int orderId, string status);
     }
 }

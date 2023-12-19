@@ -31,7 +31,7 @@ namespace DataAccessLayer.DataAccess
             this.productDAO = productDAO;
             this.userDAO = userDAO;
         }
-        public async Task<bool> Create(Order order, List<OrderDetail> orderDetails)
+        public async Task<int> Create(Order order, List<OrderDetail> orderDetails)
         {
             using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
             {
@@ -90,10 +90,10 @@ namespace DataAccessLayer.DataAccess
                             var result = await orderDetailDAO.Create(orderDetails, orderID);
                             if (result)
                             {
-                                return true;
+                                return orderID;
                             }
                         }
-                        return false;
+                        return 0;
                     }
                 }
                 catch (Exception ex)
@@ -283,6 +283,22 @@ namespace DataAccessLayer.DataAccess
                 }
             }
         }
-
+        public void UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
+                {
+                    var updateOrderQuery = $@"UPDATE [dbo].[Order]
+                                              SET [Status] = '{status}'
+                                              WHERE OrderID = {orderId}";
+                    connection.Execute(updateOrderQuery);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
     }
 }

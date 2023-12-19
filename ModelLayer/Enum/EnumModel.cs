@@ -24,5 +24,12 @@ namespace Models_Layer.Enum
             Admin = 1,
             Customer,
         }
+
+        public enum NumberOfPeople
+        {
+            LessThan2 = 1,
+            ThreeToFour = 2,
+            MoreThan4 = 3
+        }
     }
 }

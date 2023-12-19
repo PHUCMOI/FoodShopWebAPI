@@ -30,6 +30,9 @@ public partial class FoodingShopContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Cart> Cart { get; set; }
+    public virtual DbSet<Reservation> Reservations { get; set; }
+    public virtual DbSet<Restaurant> Restaurants {  get; set; }
+    public virtual DbSet<RestaurantMap> RestaurantMaps {  get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("FoodingShopDB"));
@@ -133,6 +136,21 @@ public partial class FoodingShopContext : DbContext
             entity.Property(e => e.Status).HasMaxLength(255);
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.UserName).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Restaurant>(entity =>
+        {
+            entity.HasKey(e => e.RestaurantId);
+        });
+
+        modelBuilder.Entity<Reservation>(entity =>
+        {
+            entity.HasKey(e => e.ReservationId);
+        });
+
+        modelBuilder.Entity<RestaurantMap>(entity =>
+        {
+            entity.HasNoKey();   
         });
 
         OnModelCreatingPartial(modelBuilder);

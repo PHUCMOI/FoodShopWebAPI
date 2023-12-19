@@ -17,5 +17,6 @@ namespace DataAccessLayer.DataAccessInterfaces
         Task<bool> Create(Product product);
         bool DeleteAsync(int id);
         Task<List<ProductRequest>> GetProductByCategoryName(string categoryName);
+        Task<ProductRequest> GetProductNameByID(int id);
     }
 }

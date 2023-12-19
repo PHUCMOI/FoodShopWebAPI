@@ -65,7 +65,7 @@ namespace DataAccessLayer.DataAccess
 
                         var result = command.ExecuteNonQuery();
                         con.Close();
-                        if(result != null)
+                        if (result != null)
                         {
                             return true;
                         }
@@ -77,7 +77,7 @@ namespace DataAccessLayer.DataAccess
                     throw new Exception(ex.Message);
                 }
             }
-              
+
         }
 
         public bool DeleteAsync(int id)
@@ -96,14 +96,14 @@ namespace DataAccessLayer.DataAccess
                         command.Parameters.Add(new SqlParameter("@ProductID", id));
                         command.CommandText = query;
                         command.ExecuteNonQuery();
-                        con.Close();  
+                        con.Close();
                         return true;
                     }
                 }
                 catch (Exception ex)
                 {
                     throw new Exception(ex.Message);
-                }                
+                }
             };
         }
 
@@ -151,9 +151,8 @@ namespace DataAccessLayer.DataAccess
                                       FROM Products
                                       WHERE ProductID = {id} AND IsDeleted = 0";
                     var product = await con.QuerySingleOrDefaultAsync<Product>(query, new { Id = id });
-
                     return product;
-                };
+                }
             }
             catch (Exception ex)
             {
@@ -279,6 +278,25 @@ namespace DataAccessLayer.DataAccess
 
                     return product.ToList();
                 };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ProductRequest> GetProductNameByID(int id)
+        {
+            try
+            {
+                using (IDbConnection con = new SqlConnection(_configuration.GetConnectionString("FoodingShopDB")))
+                {
+                    var query = $@"SELECT ProductName, Price
+                                      FROM Products
+                                      WHERE ProductID = {id} AND IsDeleted = 0";
+                    var product = await con.QuerySingleOrDefaultAsync<ProductRequest>(query, new { Id = id });
+                    return product;
+                }
             }
             catch (Exception ex)
             {

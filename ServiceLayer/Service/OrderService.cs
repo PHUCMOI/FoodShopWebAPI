@@ -17,14 +17,16 @@ namespace Services_Layer.Service
         private readonly IOrderDetailDAO orderDetailDAO;
         private readonly IOrderDAO orderDAO;
         private readonly IUserDAO userDAO;
-        public OrderService(IOrderDAO orderDAO, IOrderDetailDAO orderDetailDAO, IUserDAO userDAO)
+        private readonly ICartDAO cartDAO;
+        public OrderService(IOrderDAO orderDAO, IOrderDetailDAO orderDetailDAO, IUserDAO userDAO, ICartDAO cartDAO)
         {
             this.orderDAO = orderDAO;
             this.orderDetailDAO = orderDetailDAO;
             this.userDAO = userDAO;
+            this.cartDAO = cartDAO;
         }        
 
-        public async Task<bool> Create(PurchaseOrderRequest purchaseOrderRequest)
+        public async Task<int> Create(PurchaseOrderRequest purchaseOrderRequest)
         {
             try
             {                
@@ -71,11 +73,11 @@ namespace Services_Layer.Service
                     }
 
                     var result = await orderDAO.Create(order, orderDetails);
-                    if (result)
+                    if (result != 0)
                     {
-                        return true;
+                        return result;
                     }
-                    return false;
+                    return 0;
                 }
                 else
                 {
@@ -158,6 +160,19 @@ namespace Services_Layer.Service
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateOrderStatus(int orderId, string status, int userId)
+        {
+
+            if (orderId != null)
+            {
+                orderDAO.UpdateOrderStatus(orderId, status);
+                if(userId > 0)
+                {
+                    await cartDAO.ClearCart(userId);
+                }
             }
         }
     }
