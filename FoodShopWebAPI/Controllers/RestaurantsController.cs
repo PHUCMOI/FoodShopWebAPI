@@ -133,7 +133,7 @@ namespace FoodShopWebAPI.Controllers
 			}
 		}
 
-		[HttpPost("CreateMaps")]
+		[HttpPost("createMaps")]
 		public async Task<IActionResult> CreateMaps(List<RestaurantMapRequest> map)
 		{
 			try
@@ -190,6 +190,40 @@ namespace FoodShopWebAPI.Controllers
 			}
 		}
 
+		[HttpPost("AddNewTable")]
+		public async Task<ActionResult> AddNewTable(RestaurantMapRequest restaurantMapRequest) 
+		{
+			try
+			{
+				if (restaurantMapRequest != null)
+				{
+					var res = await restaurantMapService.AddNewTable(restaurantMapRequest);
+					return Ok(res);
+				}
+				return BadRequest();
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
+		[HttpPost("DeleteTable")]
+		public async Task<ActionResult> DeleteTable(DeleteTableRequest deleteTableRequest)
+		{
+			try
+			{
+				if (deleteTableRequest != null)
+				{
+					var res = await restaurantMapService.DeleteTable(deleteTableRequest);
+					return Ok(res);
+				}
+				return BadRequest();
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 	}
 }

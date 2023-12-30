@@ -14,6 +14,8 @@ namespace ServiceLayer.ServiceInterfaces
         Task<bool> CreateMaps(List<RestaurantMapRequest> map);
         Task<List<RestaurantMapResponse>> GetRestaurantMaps(GetRestaurantMap getRestaurantMap);
         Task<bool> UpdateMaps(List<RestaurantMapRequest> map);
+        Task<bool> AddNewTable(RestaurantMapRequest restaurantMapRequest);
+        Task<bool> DeleteTable(DeleteTableRequest deleteTableRequest);
         
     }
 }

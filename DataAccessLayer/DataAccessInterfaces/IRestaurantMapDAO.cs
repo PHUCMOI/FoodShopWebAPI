@@ -13,7 +13,8 @@ namespace DataAccessLayer.DataAccessInterfaces
     {
         public Task<List<RestaurantMapResponse>> RestaurantMaps(int restaurantId);
         public Task<bool> CreateMaps(List<RestaurantMap> restaurantMaps);
-        public Task<bool> DeleteMaps(int restaurantId);
+        public Task<bool> DeleteMaps(DeleteTableRequest deleteTableRequest);
         public Task<bool> UpdateMaps(List<RestaurantMapRequest> restaurantMap);
+        public Task<bool> AddNewTable(RestaurantMap map);
     }
 }

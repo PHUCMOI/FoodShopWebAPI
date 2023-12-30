@@ -13,7 +13,7 @@ namespace DataAccessLayer.DataAccessInterfaces
         Task<bool> Create(Reservation resservation);
         Task<bool> Update(Reservation reservation);
         Task<bool> Delete(int reservationId);
-        Task<List<Reservation>> GetListReservationByDate(string reservationDate);
-        Task<bool> MakeReservation(Reservation reservation);
+        Task<List<Reservation>> GetListReservationByDate(string reservationDate, int restaurantId);
+		Task<bool> MakeReservation(Reservation reservation);
     }
 }

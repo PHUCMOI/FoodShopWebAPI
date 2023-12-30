@@ -25,7 +25,28 @@ namespace ServiceLayer.Service
             this.reservationService = reservationService;
         }
 
-        public async Task<bool> CreateMaps(List<RestaurantMapRequest> maps)
+		public Task<bool> AddNewTable(RestaurantMapRequest restaurantMapRequest)
+		{
+			var map = new RestaurantMap()
+			{
+				TableId = restaurantMapRequest.TableId,
+				RestaurantId = restaurantMapRequest.RestaurantId,
+				PositionX = restaurantMapRequest.PositionX,
+				PositionY = restaurantMapRequest.PositionY,
+				Cols = restaurantMapRequest.Cols,
+				Rows = restaurantMapRequest.Rows,
+				CreateBy = restaurantMapRequest.UserId,
+				CreateAt = DateTime.Now,
+				UpdateAt = DateTime.Now,
+				UpdateBy = restaurantMapRequest.UserId,
+				IsDeleted = false
+			};
+
+			var res = restaurantMapDAO.AddNewTable(map);
+			return res;
+		}
+
+		public async Task<bool> CreateMaps(List<RestaurantMapRequest> maps)
         {
             try
             {
@@ -60,10 +81,15 @@ namespace ServiceLayer.Service
             }
         }
 
-        public async Task<List<RestaurantMapResponse>> GetRestaurantMaps(GetRestaurantMap getRestaurantMap)
+		public async Task<bool> DeleteTable(DeleteTableRequest deleteTableRequest)
+		{
+			return await restaurantMapDAO.DeleteMaps(deleteTableRequest);
+		}
+
+		public async Task<List<RestaurantMapResponse>> GetRestaurantMaps(GetRestaurantMap getRestaurantMap)
         {
             var restaurantMap = await restaurantMapDAO.RestaurantMaps(getRestaurantMap.RestaurantId);
-            var reservationListByDate = await reservationDAO.GetListReservationByDate(getRestaurantMap.ReservationDate);
+            var reservationListByDate = await reservationDAO.GetListReservationByDate(getRestaurantMap.ReservationDate, getRestaurantMap.RestaurantId);
 
 			foreach (var item in restaurantMap)
 			{

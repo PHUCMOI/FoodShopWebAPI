@@ -29,7 +29,71 @@ namespace DataAccessLayer.DataAccess
 			this.configuration = configuration;
 			this.foodContext = foodContext;
 		}
-		 public async Task<bool> CreateMaps(List<RestaurantMap> restaurantMaps)
+
+		public async Task<bool> AddNewTable(RestaurantMap map)
+		{
+			using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
+			{
+				try
+				{
+					using (var command = con.CreateCommand())
+					{
+						await con.OpenAsync();
+						var query = @"INSERT INTO [dbo].[RestaurantMap]
+                                               (RestaurantID
+                                               ,PositionX
+                                               ,PositionY
+                                               ,Cols
+                                               ,Rows
+                                               ,CreateBy
+                                               ,CreateAt
+                                               ,UpdateBy
+                                               ,UpdateAt
+                                               ,IsDeleted
+                                               ,TableId)
+                                         VALUES
+                                               (@RestaurantID
+                                               ,@PositionX
+                                               ,@PositionY
+                                               ,@Cols
+                                               ,@Rows
+                                               ,@CreateBy
+                                               ,@Createdate
+                                               ,@UpdateBy
+                                               ,@UpdateDate
+                                               ,@IsDeleted
+                                               ,@TableId)";
+
+						command.CommandText = query;
+						command.Parameters.Add(new SqlParameter("@RestaurantID", map.RestaurantId));
+						command.Parameters.Add(new SqlParameter("@PositionX", map.PositionX));
+						command.Parameters.Add(new SqlParameter("@PositionY", map.PositionY));
+						command.Parameters.Add(new SqlParameter("@Cols", map.Cols));
+						command.Parameters.Add(new SqlParameter("@Rows", map.Rows));
+						command.Parameters.Add(new SqlParameter("@CreateBy", map.CreateBy));
+						command.Parameters.Add(new SqlParameter("@CreateDate", map.CreateAt));
+						command.Parameters.Add(new SqlParameter("@IsDeleted", map.IsDeleted));
+						command.Parameters.Add(new SqlParameter("@UpdateBy", map.UpdateBy));
+						command.Parameters.Add(new SqlParameter("@UpdateDate", map.UpdateAt));
+						command.Parameters.Add(new SqlParameter("@TableId", map.TableId));
+
+						var result = command.ExecuteNonQuery();
+						con.Close();
+						if (result != null)
+						{
+							return true;
+						}
+						return false;
+					}
+				}
+				catch (Exception ex)
+				{
+					throw new Exception(ex.Message);
+				}
+			}
+		}
+
+		public async Task<bool> CreateMaps(List<RestaurantMap> restaurantMaps)
         {
             using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
             {
@@ -100,10 +164,37 @@ namespace DataAccessLayer.DataAccess
             }
         }
 
-        public Task<bool> DeleteMaps(int restaurantId)
+        public async Task<bool> DeleteMaps(DeleteTableRequest deleteTableRequest)
         {
-            throw new NotImplementedException();
-        }
+			using (var con = new SqlConnection(configuration.GetConnectionString("FoodingShopDB")))
+			{
+				try
+				{
+					using (var command = con.CreateCommand())
+					{
+						await con.OpenAsync();
+						var query = @"DELETE FROM [dbo].[RestaurantMap]
+                                      WHERE TableId = @TableId AND RestaurantId = @RestaurantId";
+
+						command.CommandText = query;
+						command.Parameters.Add(new SqlParameter("@TableId", deleteTableRequest.TableId));
+						command.Parameters.Add(new SqlParameter("@RestaurantId", deleteTableRequest.RestaurantId));
+
+						var result = command.ExecuteNonQuery();
+						con.Close();
+						if (result != null)
+						{
+							return true;
+						}
+						return false;
+					}
+				}
+				catch (Exception ex)
+				{
+					throw new Exception(ex.Message);
+				}
+			}
+		}
 
         public async Task<List<RestaurantMapResponse>> RestaurantMaps(int restaurantId)
         {
@@ -119,7 +210,6 @@ namespace DataAccessLayer.DataAccess
 
                     return restaurantMaps.ToList();
                 }
-
             }
             catch (Exception ex)
             {
@@ -141,8 +231,7 @@ namespace DataAccessLayer.DataAccess
 							await foodContext.Database.OpenConnectionAsync();
 
 							var query = $@"UPDATE [dbo].[RestaurantMap]
-                                       SET [RestaurantID] = @RestaurantID
-                                          ,[PositionX] = @PositionX
+                                       SET [PositionX] = @PositionX
                                           ,[PositionY] = @PositionY
                                           ,[Cols] = @Cols
                                           ,[Rows] = @Rows
@@ -150,7 +239,7 @@ namespace DataAccessLayer.DataAccess
                                           ,[UpdateAt] = @UpdateAt
                                           ,[UpdateBy] = @UpdateBy
                                           ,[CreateBy] = @CreateBy
-                                     WHERE [TableId] = @TableId";
+                                     WHERE [TableId] = @TableId AND RestaurantId = @RestaurantID";
 							command.CommandText = query;
 
                             command.Parameters.Clear();

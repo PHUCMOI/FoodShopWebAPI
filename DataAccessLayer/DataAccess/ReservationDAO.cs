@@ -36,7 +36,7 @@ namespace DataAccessLayer.DataAccess
             throw new NotImplementedException();
         }
 
-        public async Task<List<Reservation>> GetListReservationByDate(string reservationDate)
+        public async Task<List<Reservation>> GetListReservationByDate(string reservationDate, int restaurantId)
         {
             try
             {
@@ -54,9 +54,9 @@ namespace DataAccessLayer.DataAccess
                                   WHERE [RestaurantID] = @RestaurantID AND [DateReservation] = @DateReservation";
                     var parameters = new
                     {
-                        RestaurantID = 1,
-                        DateReservation = reservationDate
-                    };
+                        RestaurantID = restaurantId,
+                        DateReservation = DateTime.Parse(reservationDate)
+					};
                     var cartList = await con.QueryAsync<Reservation>(query, parameters);
                     return cartList.ToList();
                 };
